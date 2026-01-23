@@ -288,7 +288,7 @@ func ProcessAPI(shortName string, api *openapi3.Swagger) *OpenAPI {
 				Short:          short,
 				Long:           escapeString(description),
 				Method:         method,
-				CanHaveBody:    method == "Post" || method == "Put" || method == "Patch",
+				CanHaveBody:    method != "" && method != "Get",
 				ReturnType:     returnType,
 				Path:           path,
 				AllParams:      params,
