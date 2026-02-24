@@ -64,7 +64,7 @@ type KeyPart struct {
 }
 
 // ParseAndBuild takes a string and returns the structured data it represents.
-func ParseAndBuild(filename, input string) (map[string]interface{}, error) {
+func ParseAndBuild(filename, input string) (interface{}, error) {
 	parsed, err := Parse(filename, []byte(input))
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func ParseAndBuild(filename, input string) (map[string]interface{}, error) {
 }
 
 // Build an AST of key-value pairs into structured data.
-func Build(ast AST) (map[string]interface{}, error) {
+func Build(ast AST) (interface{}, error) {
 	result := make(map[string]interface{})
 	ctx := result
 	var ctxSlice *list
@@ -167,6 +167,11 @@ func Build(ast AST) (map[string]interface{}, error) {
 					}
 				}
 
+				if ctxSlice == nil {
+					ctx[kp.Key] = &list{}
+					ctxSlice = ctx[kp.Key].(*list)
+				}
+
 				for len(*ctxSlice) < index+1 {
 					// Increase the size of the list to fit the new item if needed.
 					ctxSlice.Append(nil)
@@ -200,6 +205,10 @@ func Build(ast AST) (map[string]interface{}, error) {
 					ctxSlice = vSlice
 				}
 			}
+		}
+
+		if len(ast) == 1 && len(k.Parts) == 1 && k.Parts[0].Key == "" {
+			return v, nil
 		}
 	}
 

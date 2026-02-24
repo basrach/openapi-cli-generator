@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/basrach/openapi-cli-generator/shorthand"
@@ -13,20 +14,43 @@ import (
 )
 
 // DeepAssign recursively merges a source map into the target.
-func DeepAssign(target, source map[string]interface{}) {
-	for k, v := range source {
-		if vm, ok := v.(map[string]interface{}); ok {
-			if _, ok := target[k]; ok {
-				if tkm, ok := target[k].(map[string]interface{}); ok {
-					DeepAssign(tkm, vm)
+func DeepAssign(target, source interface{}) {
+	if reflect.TypeOf(target) != reflect.TypeOf(source) {
+		panic("Type mismatch")
+	}
+
+	switch source.(type) {
+	case map[string]interface{}:
+		s := source.(map[string]interface{})
+		t := target.(map[string]interface{})
+		for k, v := range s {
+			if vm, ok := v.(map[string]interface{}); ok {
+				if _, ok := t[k]; ok {
+					if tkm, ok := t[k].(map[string]interface{}); ok {
+						DeepAssign(tkm, vm)
+					} else {
+						t[k] = vm
+					}
 				} else {
-					target[k] = vm
+					t[k] = vm
 				}
 			} else {
-				target[k] = vm
+				t[k] = v
 			}
-		} else {
-			target[k] = v
+		}
+	case []interface{}:
+		s := source.([]interface{})
+		t := target.([]interface{})
+		for i, v := range s {
+			if vm, ok := v.(map[string]interface{}); ok {
+				if tkm, ok := t[i].(map[string]interface{}); ok {
+					DeepAssign(tkm, vm)
+				} else {
+					t[i] = vm
+				}
+			} else {
+				t[i] = v
+			}
 		}
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/basrach/openapi-cli-generator/shorthand"
-	toml "github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -34,10 +34,15 @@ func main() {
 			case "yaml":
 				marshalled, err = yaml.Marshal(result)
 			case "toml":
-				t, err := toml.TreeFromMap(result)
-				if err == nil {
-					marshalled = []byte(t.String())
+				if m, ok := result.(map[string]interface{}); ok {
+					t, err := toml.TreeFromMap(m)
+					if err == nil {
+						marshalled = []byte(t.String())
+					}
+				} else {
+					panic("Cannot marshal list as TOML")
 				}
+
 			}
 
 			if err != nil {
