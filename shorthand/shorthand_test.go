@@ -59,6 +59,10 @@ func TestParserRootList(t *testing.T) {
 	assert.JSONEq(t, `[1, 2, 3]`, parsed(`[]: 1, 2, 3`))
 }
 
+func TestParserRootListOfOneElement(t *testing.T) {
+	assert.JSONEq(t, `[1]`, parsed(`[]: 1`))
+}
+
 func TestParserShortStringList(t *testing.T) {
 	assert.JSONEq(t, `{"foo": ["1", "2", "3"]}`, parsed(`foo:~ 1, 2, 3`))
 }

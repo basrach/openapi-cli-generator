@@ -208,7 +208,11 @@ func Build(ast AST) (interface{}, error) {
 		}
 
 		if len(ast) == 1 && len(k.Parts) == 1 && k.Parts[0].Key == "" {
-			return v, nil
+			if _, ok := v.(*list); ok {
+				return v, nil
+			} else {
+				return ctxSlice, nil
+			}
 		}
 	}
 
